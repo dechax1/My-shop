@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ร้านขายของออนไลน์</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    header { background: #222; color: white; padding: 15px; text-align: center; }
+    .container { padding: 20px; }
+    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .card img { width: 100%; border-radius: 10px; }
+    .card h3 { margin: 10px 0; }
+    .card button { background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+    .card button:hover { background: #218838; }
+    .cart { position: fixed; right: 20px; top: 20px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ร้านขายของออนไลน์</h1>
+</header>
+
+<div class="cart">
+  🛒 ตะกร้า: <span id="cart-count">0</span> ชิ้น
+</div>
+
+<div class="container">
+  <div class="products" id="product-list"></div>
+</div>
+
+<script>
+  const products = [
+    { name: "เสื้อยืด", price: 199, img: "https://via.placeholder.com/200" },
+    { name: "รองเท้า", price: 799, img: "https://via.placeholder.com/200" },
+    { name: "กระเป๋า", price: 499, img: "https://via.placeholder.com/200" }
+  ];
+
+  let cartCount = 0;
+
+  const productList = document.getElementById("product-list");
+
+  products.forEach((p, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <img src="${p.img}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p>${p.price} บาท</p>
+      <button onclick="addToCart()">เพิ่มลงตะกร้า</button>
+    `;
+    productList.appendChild(div);
+  });
+
+  function addToCart() {
+    cartCount++;
+    document.getElementById("cart-count").innerText = cartCount;
+  }
+</script>
+
+</body>
+</html>
