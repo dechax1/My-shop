@@ -177,7 +177,7 @@ input:focus, select:focus { outline: 2px solid var(--blue-2); border-color: tran
 .totals { padding: 14px 22px; background: #f6f8fc; display: grid; gap: 4px; font-size: .92rem; }
 .totals div { display: flex; justify-content: space-between; }
 .totals .grand { font-size: 1.2rem; font-weight: 700; color: var(--blue); }
-.drawer-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; padding: 16px 22px; }
+.drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 22px; }
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 120px); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 12px; transition: transform .3s, opacity .3s; z-index: 60; opacity: 0; visibility: hidden; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
@@ -194,3 +194,22 @@ input:focus, select:focus { outline: 2px solid var(--blue-2); border-color: tran
   .bar-row { grid-template-columns: 90px 1fr 80px; }
   .cart-btn { padding: 8px 12px; font-size: .85rem; }
 }
+
+/* lead forms */
+.hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.quote-form { padding: 14px 22px 4px; display: grid; gap: 10px; border-top: 1px solid var(--line); }
+.quote-form label { display: grid; gap: 4px; font-size: .85rem; font-weight: 500; }
+.quote-form input { padding: 8px 10px; }
+.qf-title { margin: 0; font-weight: 600; }
+.form-msg { margin: 0; font-size: .88rem; min-height: 1.2em; }
+.form-msg.ok { color: var(--good); }
+.form-msg.err { color: #c2410c; }
+.dark .form-msg.ok { color: #6ee7b7; }
+.dark .form-msg.err { color: #fdba74; }
+.form-msg a { color: inherit; font-weight: 600; text-decoration: underline; }
+.btn:disabled { opacity: .6; cursor: wait; }
+.model { margin: -2px 0 4px; font-size: .78rem; color: var(--blue-2); font-family: ui-monospace, monospace; }
+.line-fab { position: fixed; right: 20px; bottom: 20px; z-index: 35; display: inline-flex; align-items: center; gap: 8px; background: #06C755; color: #fff; padding: 12px 18px; border-radius: 999px; font-weight: 600; box-shadow: 0 8px 24px rgba(6,199,85,.35); }
+.line-fab[hidden] { display: none; }
+.drawer { overflow-y: auto; }
+.cart-items { min-height: 120px; }

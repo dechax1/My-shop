@@ -13,29 +13,9 @@
   const STD_SIZES = [9000, 12000, 18000, 24000, 30000, 36000, 48000];
   const GRID_EF = 0.5; // kgCO2/kWh, approx. Thai grid emission factor
 
-  // ---------- product data (demo) ----------
-  const PRODUCTS = [
-    { id: "wf-elite", type: "wall", name: "Wind-Free Elite", tag: "ขายดี",
-      desc: "ติดผนัง เย็นแบบไม่มีลมเป่าโดนตัว + Wi-Fi SmartThings",
-      feats: ["Wind-Free", "AI Auto Cooling", "PM1.0 Filter"],
-      sizes: { 9000: { p: 23900, seer: 24 }, 12000: { p: 26900, seer: 23 }, 18000: { p: 34900, seer: 22 }, 24000: { p: 44900, seer: 20 } } },
-    { id: "wf-std", type: "wall", name: "Wind-Free Standard",
-      desc: "ติดผนัง Inverter รุ่นคุ้มค่า สำหรับบ้านและคอนโด",
-      feats: ["Wind-Free", "Digital Inverter", "Fast Cooling"],
-      sizes: { 9000: { p: 18900, seer: 21 }, 12000: { p: 21500, seer: 20 }, 18000: { p: 28900, seer: 19 }, 24000: { p: 37900, seer: 18 } } },
-    { id: "cst-4way", type: "cassette", name: "Wind-Free 4-Way Cassette", tag: "งานพาณิชย์",
-      desc: "ฝังฝ้า 4 ทิศทาง กระจายลมทั่วห้อง สำหรับออฟฟิศและร้านค้า",
-      feats: ["360° airflow", "Wind-Free", "Motion sensor (option)"],
-      sizes: { 24000: { p: 52900, seer: 17 }, 30000: { p: 61900, seer: 16.5 }, 36000: { p: 69900, seer: 16 }, 48000: { p: 84900, seer: 15 } } },
-    { id: "cst-1way", type: "cassette", name: "Wind-Free 1-Way Cassette",
-      desc: "ฝังฝ้าแบบบาง เหมาะกับห้องยาวหรือมุมห้อง",
-      feats: ["Slim body", "Wind-Free", "Quiet"],
-      sizes: { 12000: { p: 36900, seer: 18 }, 18000: { p: 43900, seer: 17 }, 24000: { p: 51900, seer: 16 } } },
-    { id: "cf", type: "ceiling", name: "Ceiling & Floor",
-      desc: "แขวนใต้ฝ้าหรือตั้งพื้น ส่งลมได้ไกล เหมาะกับห้องโถงและร้านอาหาร",
-      feats: ["Long throw", "Auto swing", "Inverter"],
-      sizes: { 18000: { p: 39900, seer: 16 }, 24000: { p: 46900, seer: 15.5 }, 36000: { p: 62900, seer: 15 }, 48000: { p: 78900, seer: 14 } } },
-  ];
+  const CFG = Object.assign({ vatRate: 0.07, volumeDiscount: { minUnits: 3, rate: 0.05 } }, window.COOLPRO_CONFIG || {});
+  let PRODUCTS = window.COOLPRO_PRODUCTS || [];
+  let dataSource = "demo"; // "demo" | "sheet"
 
   const ICONS = {
     wall: `<svg viewBox="0 0 200 90"><rect x="10" y="15" width="180" height="50" rx="14" fill="#fff" stroke="#c9d4ea"/><g fill="#b9c6de">${dots(22, 26, 156, 26, 3.2)}</g><rect x="30" y="56" width="140" height="4" rx="2" fill="#c9d4ea"/><circle cx="176" cy="26" r="3" fill="#3ad29f"/></svg>`,
@@ -54,7 +34,6 @@
 
   // ---------- state ----------
   const selected = {}; // productId -> size
-  PRODUCTS.forEach((p) => (selected[p.id] = +Object.keys(p.sizes)[0]));
   let cart = load();
   let filter = "all";
   let recommended = 0;
@@ -64,25 +43,106 @@
   }
   function save() { localStorage.setItem("coolpro-cart", JSON.stringify(cart)); }
 
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- product data loading (Google Sheet CSV → fallback demo) ----------
+  // Minimal RFC 4180 CSV parser (handles quotes, escaped quotes, CRLF, newlines in quotes)
+  function parseCSV(text) {
+    const rows = []; let row = [], field = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+        else field += c;
+      } else if (c === '"') q = true;
+      else if (c === ",") { row.push(field); field = ""; }
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(field); rows.push(row); row = []; field = "";
+      } else field += c;
+    }
+    if (field !== "" || row.length) { row.push(field); rows.push(row); }
+    return rows.filter((r) => r.some((x) => x.trim() !== ""));
+  }
+
+  // One CSV row = one model at one capacity. Rows with the same `id` are grouped into one card.
+  // Columns: id,type,name,tag,desc,feats,model,btu,price,seer,active
+  function rowsToProducts(rows) {
+    const head = rows.shift().map((h) => h.trim().toLowerCase().replace(/^﻿/, ""));
+    const need = ["id", "type", "name", "btu", "price", "seer"];
+    const missing = need.filter((n) => !head.includes(n));
+    if (missing.length) throw new Error("CSV missing columns: " + missing.join(", "));
+    const map = new Map();
+    for (const r of rows) {
+      const o = Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()]));
+      if (/^(0|false|no|n|ไม่)$/i.test(o.active || "")) continue;
+      const btu = parseInt(o.btu.replace(/[^\d]/g, ""), 10);
+      const price = parseFloat(o.price.replace(/[^\d.]/g, ""));
+      const seer = parseFloat(o.seer);
+      if (!o.id || !btu || !price || !seer) continue;
+      if (!map.has(o.id)) map.set(o.id, {
+        id: o.id, type: (o.type || "wall").toLowerCase(), name: o.name, tag: o.tag || "", desc: o.desc || "",
+        feats: (o.feats || "").split("|").map((s) => s.trim()).filter(Boolean), sizes: {},
+      });
+      map.get(o.id).sizes[btu] = { p: price, seer, model: o.model || "" };
+    }
+    const list = [...map.values()].filter((p) => Object.keys(p.sizes).length);
+    if (!list.length) throw new Error("CSV contains no valid product rows");
+    return list;
+  }
+
+  async function loadProducts() {
+    if (!CFG.productsCsvUrl) return;
+    try {
+      const res = await fetch(CFG.productsCsvUrl, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      PRODUCTS = rowsToProducts(parseCSV(await res.text()));
+      dataSource = "sheet";
+    } catch (err) {
+      console.warn("[CoolPro] Could not load product sheet, using demo data:", err);
+    }
+  }
+
+  function initSelection() {
+    PRODUCTS.forEach((p) => { if (!p.sizes[selected[p.id]]) selected[p.id] = +Object.keys(p.sizes)[0]; });
+    // sync saved cart with current prices; drop items that no longer exist
+    cart = cart.filter((i) => {
+      const p = PRODUCTS.find((x) => x.id === i.id);
+      if (!p || !p.sizes[i.size]) return false;
+      i.price = p.sizes[i.size].p; i.name = p.name; i.model = p.sizes[i.size].model || "";
+      return true;
+    });
+    save();
+  }
+
+  function renderDataNote() {
+    $("#dataNote").innerHTML = dataSource === "sheet"
+      ? "* ราคารวมติดตั้งมาตรฐาน ราคาสุดท้ายยืนยันหลังสำรวจหน้างาน · ค่า SEER ตามข้อมูลผู้ผลิต (มอก. 2134)"
+      : "* ราคาและค่า SEER บนหน้านี้เป็นข้อมูลตัวอย่างสำหรับสาธิต ก่อนออกใบเสนอราคาจริงต้องตรวจสอบกับ price list และ spec sheet ล่าสุด";
+    document.body.classList.toggle("demo", dataSource !== "sheet");
+  }
+
   // ---------- products ----------
   function renderProducts() {
     const grid = $("#productGrid");
-    grid.innerHTML = PRODUCTS.filter((p) => filter === "all" || p.type === filter).map((p) => {
+    const list = PRODUCTS.filter((p) => filter === "all" || p.type === filter);
+    grid.innerHTML = list.length ? list.map((p) => {
       const size = selected[p.id];
       const s = p.sizes[size];
       const fits = recommended && p.sizes[recommended];
-      return `<article class="card product ${fits ? "highlight" : ""}" data-id="${p.id}">
-        <div class="thumb">${p.tag ? `<span class="tag">${p.tag}</span>` : ""}${ICONS[p.type]}</div>
-        <h3>${p.name}</h3>
-        <p class="muted small">${p.desc}</p>
-        <div class="specs">${p.feats.map((f) => `<span>${f}</span>`).join("")}<span>SEER ${s.seer}</span></div>
+      return `<article class="card product ${fits ? "highlight" : ""}" data-id="${esc(p.id)}">
+        <div class="thumb">${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}${ICONS[p.type] || ICONS.wall}</div>
+        <h3>${esc(p.name)}</h3>
+        ${s.model ? `<p class="model">${esc(s.model)}</p>` : ""}
+        <p class="muted small">${esc(p.desc)}</p>
+        <div class="specs">${p.feats.map((f) => `<span>${esc(f)}</span>`).join("")}<span>SEER ${esc(s.seer)}</span></div>
         <div class="size-select">${Object.keys(p.sizes).map((k) => `<button data-size="${k}" class="${+k === size ? "on" : ""}">${(+k / 1000)}k BTU</button>`).join("")}</div>
         <div class="price-row">
           <div class="price">${baht(s.p)} <small>รวมติดตั้งมาตรฐาน</small></div>
-          <button class="add" aria-label="เพิ่ม ${p.name} ลงใบเสนอราคา">+</button>
+          <button class="add" aria-label="เพิ่ม ${esc(p.name)} ลงใบเสนอราคา">+</button>
         </div>
       </article>`;
-    }).join("");
+    }).join("") : `<p class="muted">ไม่มีสินค้าในหมวดนี้</p>`;
   }
 
   $("#productGrid").addEventListener("click", (e) => {
@@ -109,18 +169,21 @@
     const key = p.id + "-" + size;
     const item = cart.find((i) => i.key === key);
     if (item) item.qty++;
-    else cart.push({ key, id: p.id, name: p.name, size, price: p.sizes[size].p, qty: 1 });
+    else cart.push({ key, id: p.id, name: p.name, model: p.sizes[size].model || "", size, price: p.sizes[size].p, qty: 1 });
     save(); renderCart();
     const b = $("#cartCount"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
     toast(`เพิ่ม ${p.name} ${fmt(size)} BTU แล้ว`);
   }
 
+  const VD = CFG.volumeDiscount || { minUnits: Infinity, rate: 0 };
+  const pct = (r) => Math.round(r * 100) + "%";
+
   function totals() {
     const sub = cart.reduce((a, i) => a + i.price * i.qty, 0);
     const units = cart.reduce((a, i) => a + i.qty, 0);
-    const disc = units >= 3 ? sub * 0.05 : 0; // demo: 5% off for 3+ units
+    const disc = units >= VD.minUnits ? sub * VD.rate : 0;
     const net = sub - disc;
-    const vat = net * 0.07;
+    const vat = net * CFG.vatRate;
     return { sub, disc, net, vat, grand: net + vat, units };
   }
 
@@ -129,14 +192,15 @@
     $("#cartCount").textContent = t.units;
     $("#cartItems").innerHTML = cart.length ? cart.map((i, idx) => `
       <div class="ci">
-        <div><div class="name">${i.name}</div><div class="meta">${fmt(i.size)} BTU · ${baht(i.price)} / ชุด</div></div>
+        <div><div class="name">${esc(i.name)}</div><div class="meta">${i.model ? esc(i.model) + " · " : ""}${fmt(i.size)} BTU · ${baht(i.price)} / ชุด</div></div>
         <div class="qty"><button data-dec="${idx}" aria-label="ลด">−</button><b>${i.qty}</b><button data-inc="${idx}" aria-label="เพิ่ม">+</button></div>
       </div>`).join("") : `<p class="empty">ยังไม่มีรายการ<br>เลือกสินค้าแล้วกด + เพื่อเพิ่มลงใบเสนอราคา</p>`;
     $("#totals").innerHTML = cart.length ? `
       <div><span>รวม (${t.units} ชุด)</span><span>${baht(t.sub)}</span></div>
-      ${t.disc ? `<div style="color:var(--good)"><span>ส่วนลดโครงการ 3 ชุดขึ้นไป 5%</span><span>−${baht(t.disc)}</span></div>` : `<div class="muted small"><span>ซื้อ 3 ชุดขึ้นไป ลด 5%</span><span></span></div>`}
-      <div><span>VAT 7%</span><span>${baht(t.vat)}</span></div>
+      ${t.disc ? `<div style="color:var(--good)"><span>ส่วนลดโครงการ ${VD.minUnits} ชุดขึ้นไป ${pct(VD.rate)}</span><span>−${baht(t.disc)}</span></div>` : VD.rate ? `<div class="muted small"><span>ซื้อ ${VD.minUnits} ชุดขึ้นไป ลด ${pct(VD.rate)}</span><span></span></div>` : ""}
+      <div><span>VAT ${pct(CFG.vatRate)}</span><span>${baht(t.vat)}</span></div>
       <div class="grand"><span>รวมสุทธิ</span><span>${baht(t.grand)}</span></div>` : "";
+    $("#quoteForm").hidden = !cart.length;
   }
 
   $("#cartItems").addEventListener("click", (e) => {
@@ -155,25 +219,94 @@
   document.addEventListener("keydown", (e) => e.key === "Escape" && closeDrawer());
   $("#clearCart").onclick = () => { cart = []; save(); renderCart(); };
 
-  $("#copyQuote").onclick = async () => {
-    if (!cart.length) return toast("ยังไม่มีรายการในใบเสนอราคา");
+  function quoteText() {
     const t = totals();
     const date = new Date().toLocaleDateString("th-TH", { dateStyle: "long" });
-    const lines = [
+    return [
       `ใบเสนอราคาเบื้องต้น — CoolPro HVAC (${date})`,
       "",
-      ...cart.map((i, n) => `${n + 1}. Samsung ${i.name} ${fmt(i.size)} BTU × ${i.qty} = ${baht(i.price * i.qty)}`),
+      ...cart.map((i, n) => `${n + 1}. Samsung ${i.name}${i.model ? " (" + i.model + ")" : ""} ${fmt(i.size)} BTU × ${i.qty} = ${baht(i.price * i.qty)}`),
       "",
       `รวม ${baht(t.sub)}`,
-      t.disc ? `ส่วนลด 5% −${baht(t.disc)}` : null,
-      `VAT 7% ${baht(t.vat)}`,
+      t.disc ? `ส่วนลด ${pct(VD.rate)} −${baht(t.disc)}` : null,
+      `VAT ${pct(CFG.vatRate)} ${baht(t.vat)}`,
       `รวมสุทธิ ${baht(t.grand)}`,
       "",
-      "* ราคารวมติดตั้งมาตรฐาน (ท่อน้ำยาไม่เกิน 4 ม.) ราคายืนยันหลังสำรวจหน้างาน",
+      CFG.quoteFooter || "",
+      CFG.phone ? `โทร ${CFG.phone}` : null,
     ].filter((x) => x !== null).join("\n");
-    try { await navigator.clipboard.writeText(lines); toast("คัดลอกแล้ว นำไปวางใน LINE หรืออีเมลได้เลย"); }
-    catch { prompt("คัดลอกข้อความนี้:", lines); }
+  }
+
+  async function copyText(text, okMsg) {
+    try { await navigator.clipboard.writeText(text); toast(okMsg); return true; }
+    catch { prompt("คัดลอกข้อความนี้:", text); return false; }
+  }
+
+  $("#copyQuote").onclick = () => {
+    if (!cart.length) return toast("ยังไม่มีรายการในใบเสนอราคา");
+    copyText(quoteText(), "คัดลอกแล้ว นำไปวางใน LINE หรืออีเมลได้เลย");
   };
+
+  // ---------- lead submission (Google Apps Script → Sheet + LINE OA push) ----------
+  const PHONE_RE = /^(0[689]\d{8}|0[2-7]\d{7})$/; // Thai mobile (10 digits) or landline (9 digits)
+  const cleanPhone = (v) => String(v || "").replace(/[\s\-()+]/g, "").replace(/^66/, "0");
+
+  async function sendLead(payload) {
+    if (!CFG.leadEndpoint) throw Object.assign(new Error("no-endpoint"), { code: "no-endpoint" });
+    const res = await fetch(CFG.leadEndpoint, {
+      method: "POST",
+      // text/plain keeps this a CORS "simple request" (no preflight), which Apps Script requires
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ ...payload, page: location.href, ua: navigator.userAgent, ts: new Date().toISOString() }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || "HTTP " + res.status);
+    return data;
+  }
+
+  function leadFailMessage(err) {
+    if (err.code === "no-endpoint") {
+      return CFG.lineOaUrl
+        ? `ระบบส่งข้อมูลยังไม่ได้ตั้งค่า ใบเสนอราคาถูกคัดลอกแล้ว <a href="${esc(CFG.lineOaUrl)}" target="_blank" rel="noopener">กดเพื่อส่งทาง LINE</a>`
+        : "ระบบส่งข้อมูลยังไม่ได้ตั้งค่า (โหมดสาธิต) ใบเสนอราคาถูกคัดลอกแล้ว";
+    }
+    return `ส่งไม่สำเร็จ (${esc(err.message)}) ใบเสนอราคาถูกคัดลอกแล้ว${CFG.lineOaUrl ? ` <a href="${esc(CFG.lineOaUrl)}" target="_blank" rel="noopener">ส่งทาง LINE แทน</a>` : ""}`;
+  }
+
+  async function handleForm(form, msgEl, buildPayload, onSuccess) {
+    const btn = form.querySelector("button[type=submit]");
+    msgEl.className = "form-msg";
+    if (form.querySelector("[name=website]").value) return; // honeypot: bots fill hidden field
+    const phone = cleanPhone(form.querySelector("[name=phone]").value);
+    if (!PHONE_RE.test(phone)) { msgEl.textContent = "กรุณากรอกเบอร์โทร ให้ครบ เช่น 0812345678 หรือ 021234567"; msgEl.classList.add("err"); return; }
+    btn.disabled = true; const label = btn.textContent; btn.textContent = "กำลังส่ง…";
+    try {
+      const r = await sendLead({ ...buildPayload(), phone });
+      msgEl.textContent = `ส่งเรียบร้อย เลขที่อ้างอิง ${r.ref || "-"} ทีมงานจะติดต่อกลับภายใน 1 วันทำการ`;
+      msgEl.classList.add("ok");
+      onSuccess && onSuccess(r);
+    } catch (err) {
+      console.warn("[CoolPro] lead submit failed:", err);
+      if (buildPayload().type === "quote") await navigator.clipboard?.writeText(quoteText()).catch(() => {});
+      msgEl.innerHTML = leadFailMessage(err);
+      msgEl.classList.add("err");
+    } finally { btn.disabled = false; btn.textContent = label; }
+  }
+
+  $("#quoteForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = e.target;
+    handleForm(f, $("#quoteMsg"), () => {
+      const t = totals();
+      return {
+        type: "quote",
+        name: f.elements.fullname.value.trim(), contact: f.elements.contact.value.trim(), note: f.elements.note.value.trim(),
+        items: cart.map(({ id, name, model, size, price, qty }) => ({ id, name, model, btu: size, price, qty })),
+        totals: { subtotal: Math.round(t.sub), discount: Math.round(t.disc), vat: Math.round(t.vat), grand: Math.round(t.grand), units: t.units },
+        priceSource: dataSource,
+      };
+    }, () => { cart = []; save(); renderCart(); $("#quoteForm").hidden = false; });
+  });
 
   // ---------- BTU calculator ----------
   const ROOM_FACTOR = { bed: 700, living: 800, office: 850, shop: 950 }; // BTU/h per m²
@@ -281,7 +414,15 @@
   $("#leadForm").addEventListener("input", calcProject);
   $("#leadForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    $("#leadMsg").textContent = `รับข้อมูล "${$("#pName").value}" แล้ว (เดโม: ระบบนี้ยังไม่ได้ส่งข้อมูลออกไปจริง)`;
+    const f = e.target;
+    handleForm(f, $("#leadMsg"), () => {
+      const a = +$("#pArea").value || 0, type = $("#pType").value;
+      return {
+        type: "project",
+        name: f.elements.fullname.value.trim(), contact: f.elements.contact.value.trim(), note: "",
+        project: { company: $("#pName").value.trim(), areaM2: a, buildingType: type, estTR: +(a * BLD[type] / 12000).toFixed(1) },
+      };
+    });
   });
 
   // ---------- toast ----------
@@ -291,9 +432,16 @@
     clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2200);
   }
 
-  // init
-  renderCart();
-  calcBTU();
-  calcROI();
-  calcProject();
+  // ---------- LINE OA button ----------
+  if (CFG.lineOaUrl) {
+    $$("[data-line]").forEach((a) => { a.href = CFG.lineOaUrl; a.hidden = false; });
+  }
+  if (CFG.phone) $$("[data-phone]").forEach((el) => { el.textContent = CFG.phone; el.closest("[hidden]")?.removeAttribute("hidden"); });
+
+  // ---------- init ----------
+  (async () => {
+    initSelection(); renderDataNote(); renderCart(); calcBTU(); calcROI(); calcProject();
+    await loadProducts();       // may swap in live prices from the Google Sheet
+    initSelection(); renderDataNote(); renderCart(); calcBTU();
+  })();
 })();

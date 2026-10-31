@@ -84,7 +84,7 @@
       </div>
     </div>
     <div class="grid" id="productGrid"></div>
-    <p class="note">* ราคาและค่า SEER บนหน้านี้เป็นข้อมูลตัวอย่างสำหรับสาธิต ก่อนออกใบเสนอราคาจริงต้องตรวจสอบกับ price list และ spec sheet ล่าสุด</p>
+    <p class="note" id="dataNote"></p>
   </div>
 </section>
 
@@ -201,14 +201,21 @@
         </label>
       </div>
       <p class="estimate" id="pEst"></p>
+      <div class="row2">
+        <label>ชื่อผู้ติดต่อ<input name="fullname" required maxlength="80" autocomplete="name"></label>
+        <label>เบอร์โทร<input name="phone" required inputmode="tel" maxlength="15" autocomplete="tel" placeholder="0812345678"></label>
+      </div>
+      <label>LINE ID / อีเมล (ไม่บังคับ)<input name="contact" maxlength="100"></label>
+      <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
       <button class="btn btn-primary full" type="submit">ส่งข้อมูลให้ทีมวิศวกร</button>
-      <p class="muted small" id="leadMsg"></p>
+      <p class="form-msg" id="leadMsg" aria-live="polite"></p>
     </form>
   </div>
 </section>
 
 <footer class="footer">
   <div class="wrap">
+    <p hidden>โทร <b data-phone></b></p>
     <p>© 2026 CoolPro HVAC — ร้านสาธิต (demo) ไม่ใช่เว็บไซต์ทางการของ Samsung · Samsung, Wind-Free และ DVM เป็นเครื่องหมายการค้าของ Samsung Electronics</p>
   </div>
 </footer>
@@ -222,14 +229,33 @@
   </div>
   <div id="cartItems" class="cart-items"></div>
   <div class="totals" id="totals"></div>
+  <form class="quote-form" id="quoteForm" hidden>
+    <p class="qf-title">ส่งคำขอใบเสนอราคา</p>
+    <div class="row2">
+      <label>ชื่อ<input name="fullname" required maxlength="80" autocomplete="name"></label>
+      <label>เบอร์โทร<input name="phone" required inputmode="tel" maxlength="15" autocomplete="tel" placeholder="0812345678"></label>
+    </div>
+    <label>LINE ID / อีเมล (ไม่บังคับ)<input name="contact" maxlength="100"></label>
+    <label>หมายเหตุ เช่น ที่ตั้ง ชั้น ระยะท่อ (ไม่บังคับ)<input name="note" maxlength="300"></label>
+    <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+    <button class="btn btn-primary full" type="submit">ส่งคำขอให้ทีมงาน</button>
+    <p class="form-msg" id="quoteMsg" aria-live="polite"></p>
+  </form>
   <div class="drawer-actions">
     <button class="btn btn-ghost" id="clearCart">ล้างรายการ</button>
-    <button class="btn btn-primary" id="copyQuote">คัดลอกใบเสนอราคา</button>
+    <button class="btn btn-ghost" id="copyQuote">คัดลอกใบเสนอราคา</button>
   </div>
 </aside>
 
 <div class="toast" id="toast" role="status"></div>
 
+<a class="line-fab" data-line hidden target="_blank" rel="noopener" aria-label="แชทกับเราทาง LINE">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8.1-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg>
+  แชท LINE
+</a>
+
+<script src="assets/config.js"></script>
+<script src="assets/products.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
