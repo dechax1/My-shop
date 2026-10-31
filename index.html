@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoolPro HVAC Shop — แอร์ Samsung Wind-Free & DVM S2 | คำนวณ BTU และความคุ้มค่า</title>
+  <meta name="description" content="ร้านแอร์ Samsung: Wind-Free, Cassette, DVM S2 VRF พร้อมเครื่องคำนวณ BTU, เครื่องคำนวณค่าไฟและระยะคืนทุน และใบเสนอราคาออนไลน์">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a href="#" class="logo">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#1428A0"/><path d="M9 13h14M9 16h14M9 19h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/></svg>
+      <span>CoolPro <b>HVAC</b></span>
+    </a>
+    <nav class="nav">
+      <a href="#products">สินค้า</a>
+      <a href="#btu">คำนวณ BTU</a>
+      <a href="#roi">ความคุ้มค่า</a>
+      <a href="#project">งานโครงการ</a>
+    </nav>
+    <button class="cart-btn" id="cartBtn" aria-label="เปิดใบเสนอราคา">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg>
+      ใบเสนอราคา <span class="badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">ตัวแทนจำหน่ายและติดตั้งแอร์ Samsung</p>
+      <h1>เย็นสบาย <span class="hl">ไม่มีลมเป่าโดนตัว</span><br>ค่าไฟลดลงแบบคำนวณได้</h1>
+      <p class="lead">เลือกขนาดเครื่องให้ตรงห้อง คำนวณค่าไฟเทียบกับแอร์เครื่องเดิม แล้วขอใบเสนอราคาได้จากหน้านี้ ใช้เวลาไม่ถึง 2 นาที</p>
+      <div class="hero-cta">
+        <a href="#btu" class="btn btn-primary">คำนวณ BTU ห้องของคุณ</a>
+        <a href="#roi" class="btn btn-ghost">ดูว่าประหยัดได้เท่าไร</a>
+      </div>
+      <ul class="trust">
+        <li><b>23,000</b><span>รูลมขนาดเล็ก (Wind-Free)</span></li>
+        <li><b>Inverter</b><span>ทุกรุ่นในร้าน</span></li>
+        <li><b>ช่างรับรอง</b><span>ติดตั้งและ commissioning</span></li>
+      </ul>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 420 320">
+        <defs>
+          <linearGradient id="unit" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6ebf5"/></linearGradient>
+          <radialGradient id="glow" cx=".5" cy=".3" r=".7"><stop offset="0" stop-color="#7fb3ff" stop-opacity=".55"/><stop offset="1" stop-color="#7fb3ff" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="210" cy="150" r="170" fill="url(#glow)"/>
+        <rect x="40" y="50" width="340" height="96" rx="22" fill="url(#unit)" stroke="#cfd8ea"/>
+        <g id="microholes" fill="#b9c6de"></g>
+        <rect x="70" y="128" width="280" height="6" rx="3" fill="#cfd8ea"/>
+        <circle cx="352" cy="74" r="4" fill="#3ad29f"/>
+        <g class="breeze" stroke="#7fb3ff" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M90 170 q20 20 0 40 q-20 20 0 40"/>
+          <path d="M170 170 q20 20 0 40 q-20 20 0 40"/>
+          <path d="M250 170 q20 20 0 40 q-20 20 0 40"/>
+          <path d="M330 170 q20 20 0 40 q-20 20 0 40"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">สินค้า</p>
+        <h2>เลือกรุ่นที่เหมาะกับพื้นที่</h2>
+      </div>
+      <div class="filters" id="filters" role="tablist">
+        <button class="chip active" data-f="all">ทั้งหมด</button>
+        <button class="chip" data-f="wall">ติดผนัง</button>
+        <button class="chip" data-f="cassette">Cassette</button>
+        <button class="chip" data-f="ceiling">Ceiling &amp; Floor</button>
+      </div>
+    </div>
+    <div class="grid" id="productGrid"></div>
+    <p class="note">* ราคาและค่า SEER บนหน้านี้เป็นข้อมูลตัวอย่างสำหรับสาธิต ก่อนออกใบเสนอราคาจริงต้องตรวจสอบกับ price list และ spec sheet ล่าสุด</p>
+  </div>
+</section>
+
+<!-- BTU CALCULATOR -->
+<section id="btu" class="section alt">
+  <div class="wrap two-col">
+    <div>
+      <p class="eyebrow">เครื่องมือ 1</p>
+      <h2>คำนวณ BTU ที่ห้องต้องใช้</h2>
+      <p class="muted">ใช้วิธีประมาณตามพื้นที่ (rule-of-thumb) ที่ปรับตามแดด ประเภทห้อง จำนวนคน และความสูงฝ้า เหมาะสำหรับคัดเลือกเครื่องเบื้องต้น ส่วนงานโครงการควรทำ heat load calculation ตามมาตรฐาน ASHRAE</p>
+      <form class="card form" id="btuForm" autocomplete="off">
+        <div class="row2">
+          <label>กว้าง (ม.)<input type="number" id="w" value="4" min="1" step="0.1"></label>
+          <label>ยาว (ม.)<input type="number" id="l" value="5" min="1" step="0.1"></label>
+        </div>
+        <div class="row2">
+          <label>ความสูงฝ้า (ม.)<input type="number" id="h" value="2.7" min="2.2" step="0.1"></label>
+          <label>จำนวนคน<input type="number" id="ppl" value="2" min="1" step="1"></label>
+        </div>
+        <label>ประเภทห้อง
+          <select id="room">
+            <option value="bed">ห้องนอน</option>
+            <option value="living" selected>ห้องนั่งเล่น / ห้องรับแขก</option>
+            <option value="office">ห้องทำงาน / ออฟฟิศ</option>
+            <option value="shop">ร้านค้า / ร้านอาหาร</option>
+          </select>
+        </label>
+        <fieldset class="seg">
+          <legend>แดดส่องเข้าห้อง</legend>
+          <label><input type="radio" name="sun" value="0" checked><span>น้อย</span></label>
+          <label><input type="radio" name="sun" value="1"><span>บ่าย / ทิศตะวันตก</span></label>
+          <label><input type="radio" name="sun" value="2"><span>ชั้นบนสุด / กระจกเยอะ</span></label>
+        </fieldset>
+      </form>
+    </div>
+    <div class="result card" id="btuResult" aria-live="polite">
+      <p class="muted small">ภาระความเย็นโดยประมาณ</p>
+      <div class="big"><span id="btuVal">0</span> <small>BTU/h</small></div>
+      <div class="meter"><div id="btuBar"></div></div>
+      <dl class="kv">
+        <div><dt>พื้นที่</dt><dd id="areaVal">–</dd></div>
+        <div><dt>ขนาดแนะนำ</dt><dd id="sizeVal">–</dd></div>
+        <div><dt>เทียบเป็นตัน</dt><dd id="trVal">–</dd></div>
+      </dl>
+      <div class="rec" id="recBox"></div>
+      <button class="btn btn-primary full" id="useSize">ใช้ขนาดนี้คำนวณความคุ้มค่า →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ROI CALCULATOR -->
+<section id="roi" class="section">
+  <div class="wrap two-col">
+    <div>
+      <p class="eyebrow">เครื่องมือ 2</p>
+      <h2>เปลี่ยนแอร์เก่าแล้วคืนทุนกี่ปี?</h2>
+      <p class="muted">เทียบค่าไฟระหว่างแอร์ Fixed-speed เครื่องเดิมกับ Samsung Inverter โดยใช้ค่า SEER (BTU/Wh) ตามวิธีของ มอก. 2134 / ISO 16358</p>
+      <form class="card form" id="roiForm" autocomplete="off">
+        <div class="row2">
+          <label>ขนาดเครื่อง (BTU/h)<input type="number" id="cap" value="18000" step="1000" min="9000"></label>
+          <label>ชั่วโมงใช้งาน / วัน<input type="number" id="hrs" value="8" min="1" max="24"></label>
+        </div>
+        <div class="row2">
+          <label>SEER แอร์เก่า<input type="number" id="seerOld" value="10" step="0.5" min="5"></label>
+          <label>SEER แอร์ใหม่<input type="number" id="seerNew" value="22" step="0.5" min="10"></label>
+        </div>
+        <div class="row2">
+          <label>ค่าไฟ (บาท/kWh)<input type="number" id="tariff" value="4.2" step="0.1" min="1"></label>
+          <label>ราคาแอร์ใหม่ + ติดตั้ง (บาท)<input type="number" id="price" value="32900" step="500" min="0"></label>
+        </div>
+        <label class="range">วันใช้งานต่อปี: <b id="daysLbl">330</b>
+          <input type="range" id="days" min="100" max="365" value="330">
+        </label>
+      </form>
+    </div>
+    <div class="card result">
+      <div class="stats">
+        <div><p class="muted small">ประหยัดต่อปี</p><p class="stat good" id="saveYr">–</p></div>
+        <div><p class="muted small">ระยะคืนทุน</p><p class="stat" id="payback">–</p></div>
+        <div><p class="muted small">ลด CO₂ ต่อปี</p><p class="stat" id="co2">–</p></div>
+      </div>
+      <div class="bars" id="bars">
+        <div class="bar-row"><span>แอร์เก่า</span><div class="bar"><i id="barOld" class="old"></i></div><b id="costOld">–</b></div>
+        <div class="bar-row"><span>Samsung Inverter</span><div class="bar"><i id="barNew" class="new"></i></div><b id="costNew">–</b></div>
+      </div>
+      <p class="muted small">ค่าไฟสะสมในช่วง 10 ปี</p>
+      <svg id="cumChart" viewBox="0 0 400 180" class="chart" role="img" aria-label="กราฟค่าไฟสะสม 10 ปี"></svg>
+      <p class="pitch" id="pitch"></p>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT / DVM -->
+<section id="project" class="section dark">
+  <div class="wrap two-col">
+    <div>
+      <p class="eyebrow light">งานโครงการ B2B</p>
+      <h2>Samsung DVM S2 สำหรับอาคารและออฟฟิศ</h2>
+      <p>ระบบ VRF ที่ outdoor ชุดเดียวต่อ indoor ได้หลายสิบเครื่อง ควบคุมแยกโซน และเชื่อมกับ BMS ได้</p>
+      <ul class="ticks">
+        <li>เชื่อม BMS ผ่าน BACnet/IP หรือ Modbus gateway</li>
+        <li>รับงานออกแบบ heat load, เดินท่อ และ refnet ตามแบบ</li>
+        <li>Commissioning, อ่าน error code และ service contract</li>
+        <li>เชื่อมกับ Smart Home / Home Assistant สำหรับบ้านพักอาศัยขนาดใหญ่</li>
+      </ul>
+    </div>
+    <form class="card form dark-card" id="leadForm">
+      <h3>ขอคำปรึกษางานโครงการ</h3>
+      <label>ชื่อโครงการ / บริษัท<input required id="pName" placeholder="เช่น อาคารสำนักงาน 8 ชั้น"></label>
+      <div class="row2">
+        <label>พื้นที่ปรับอากาศ (ตร.ม.)<input type="number" id="pArea" value="1200" min="50"></label>
+        <label>ประเภทอาคาร
+          <select id="pType"><option value="office">ออฟฟิศ</option><option value="hotel">โรงแรม</option><option value="retail">ค้าปลีก</option><option value="resi">บ้าน / คอนโด</option></select>
+        </label>
+      </div>
+      <p class="estimate" id="pEst"></p>
+      <button class="btn btn-primary full" type="submit">ส่งข้อมูลให้ทีมวิศวกร</button>
+      <p class="muted small" id="leadMsg"></p>
+    </form>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>© 2026 CoolPro HVAC — ร้านสาธิต (demo) ไม่ใช่เว็บไซต์ทางการของ Samsung · Samsung, Wind-Free และ DVM เป็นเครื่องหมายการค้าของ Samsung Electronics</p>
+  </div>
+</footer>
+
+<!-- QUOTE DRAWER -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="ใบเสนอราคา">
+  <div class="drawer-head">
+    <h3>ใบเสนอราคาเบื้องต้น</h3>
+    <button class="icon-btn" id="closeDrawer" aria-label="ปิด">✕</button>
+  </div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="totals" id="totals"></div>
+  <div class="drawer-actions">
+    <button class="btn btn-ghost" id="clearCart">ล้างรายการ</button>
+    <button class="btn btn-primary" id="copyQuote">คัดลอกใบเสนอราคา</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
