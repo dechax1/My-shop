@@ -1,0 +1,20 @@
+﻿id,type,name,tag,desc,feats,model,btu,price,seer,active
+wf-elite,wall,Wind-Free Elite,ขายดี,ติดผนัง เย็นแบบไม่มีลมเป่าโดนตัว + Wi-Fi SmartThings,Wind-Free|AI Auto Cooling|PM1.0 Filter,,9000,23900,24,TRUE
+wf-elite,wall,Wind-Free Elite,ขายดี,ติดผนัง เย็นแบบไม่มีลมเป่าโดนตัว + Wi-Fi SmartThings,Wind-Free|AI Auto Cooling|PM1.0 Filter,,12000,26900,23,TRUE
+wf-elite,wall,Wind-Free Elite,ขายดี,ติดผนัง เย็นแบบไม่มีลมเป่าโดนตัว + Wi-Fi SmartThings,Wind-Free|AI Auto Cooling|PM1.0 Filter,,18000,34900,22,TRUE
+wf-elite,wall,Wind-Free Elite,ขายดี,ติดผนัง เย็นแบบไม่มีลมเป่าโดนตัว + Wi-Fi SmartThings,Wind-Free|AI Auto Cooling|PM1.0 Filter,,24000,44900,20,TRUE
+wf-std,wall,Wind-Free Standard,,ติดผนัง Inverter รุ่นคุ้มค่า สำหรับบ้านและคอนโด,Wind-Free|Digital Inverter|Fast Cooling,,9000,18900,21,TRUE
+wf-std,wall,Wind-Free Standard,,ติดผนัง Inverter รุ่นคุ้มค่า สำหรับบ้านและคอนโด,Wind-Free|Digital Inverter|Fast Cooling,,12000,21500,20,TRUE
+wf-std,wall,Wind-Free Standard,,ติดผนัง Inverter รุ่นคุ้มค่า สำหรับบ้านและคอนโด,Wind-Free|Digital Inverter|Fast Cooling,,18000,28900,19,TRUE
+wf-std,wall,Wind-Free Standard,,ติดผนัง Inverter รุ่นคุ้มค่า สำหรับบ้านและคอนโด,Wind-Free|Digital Inverter|Fast Cooling,,24000,37900,18,TRUE
+cst-4way,cassette,Wind-Free 4-Way Cassette,งานพาณิชย์,ฝังฝ้า 4 ทิศทาง กระจายลมทั่วห้อง สำหรับออฟฟิศและร้านค้า,360° airflow|Wind-Free|Motion sensor (option),,24000,52900,17,TRUE
+cst-4way,cassette,Wind-Free 4-Way Cassette,งานพาณิชย์,ฝังฝ้า 4 ทิศทาง กระจายลมทั่วห้อง สำหรับออฟฟิศและร้านค้า,360° airflow|Wind-Free|Motion sensor (option),,30000,61900,16.5,TRUE
+cst-4way,cassette,Wind-Free 4-Way Cassette,งานพาณิชย์,ฝังฝ้า 4 ทิศทาง กระจายลมทั่วห้อง สำหรับออฟฟิศและร้านค้า,360° airflow|Wind-Free|Motion sensor (option),,36000,69900,16,TRUE
+cst-4way,cassette,Wind-Free 4-Way Cassette,งานพาณิชย์,ฝังฝ้า 4 ทิศทาง กระจายลมทั่วห้อง สำหรับออฟฟิศและร้านค้า,360° airflow|Wind-Free|Motion sensor (option),,48000,84900,15,TRUE
+cst-1way,cassette,Wind-Free 1-Way Cassette,,ฝังฝ้าแบบบาง เหมาะกับห้องยาวหรือมุมห้อง,Slim body|Wind-Free|Quiet,,12000,36900,18,TRUE
+cst-1way,cassette,Wind-Free 1-Way Cassette,,ฝังฝ้าแบบบาง เหมาะกับห้องยาวหรือมุมห้อง,Slim body|Wind-Free|Quiet,,18000,43900,17,TRUE
+cst-1way,cassette,Wind-Free 1-Way Cassette,,ฝังฝ้าแบบบาง เหมาะกับห้องยาวหรือมุมห้อง,Slim body|Wind-Free|Quiet,,24000,51900,16,TRUE
+cf,ceiling,Ceiling & Floor,,แขวนใต้ฝ้าหรือตั้งพื้น ส่งลมได้ไกล เหมาะกับห้องโถงและร้านอาหาร,Long throw|Auto swing|Inverter,,18000,39900,16,TRUE
+cf,ceiling,Ceiling & Floor,,แขวนใต้ฝ้าหรือตั้งพื้น ส่งลมได้ไกล เหมาะกับห้องโถงและร้านอาหาร,Long throw|Auto swing|Inverter,,24000,46900,15.5,TRUE
+cf,ceiling,Ceiling & Floor,,แขวนใต้ฝ้าหรือตั้งพื้น ส่งลมได้ไกล เหมาะกับห้องโถงและร้านอาหาร,Long throw|Auto swing|Inverter,,36000,62900,15,TRUE
+cf,ceiling,Ceiling & Floor,,แขวนใต้ฝ้าหรือตั้งพื้น ส่งลมได้ไกล เหมาะกับห้องโถงและร้านอาหาร,Long throw|Auto swing|Inverter,,48000,78900,14,TRUE
